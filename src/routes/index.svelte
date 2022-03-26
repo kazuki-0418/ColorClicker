@@ -59,7 +59,7 @@
         transform-origin: 0px 0px 0px;
         caret-color: transparent;
         text-align: center;
-        font: 40px MPLUS1p_regular, Arial, sans-serif;
+        font: 22px MPLUS1p_regular, Arial, sans-serif;
       }
     }
   }
@@ -86,10 +86,8 @@
       font-size: 6vmin;
       font-weight: 10;
       &:hover {
-        transition-duration: 0.5s;
-
         cursor: pointer;
-        background: #d7eeff;
+        background: #bbffff;
       }
     }
   }

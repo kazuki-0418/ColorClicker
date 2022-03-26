@@ -4,7 +4,7 @@
 
 <Background>
   <div class="header">
-    <button class="back" on:click>back</button>
+    <a href="/"><button class="back" on:click>back</button></a>
 
     <button class="reload">reload</button>
   </div>
