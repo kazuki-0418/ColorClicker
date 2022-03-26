@@ -18,7 +18,12 @@
       intervalId = setInterval(() => (timerSecond += 0.01), 10)
     }
   }
-  const decrementCount = (color) => {}
+  const decrementCount = (color) => {
+    if (colorPalette[colorIndex].color === color) {
+      count -= 1
+    }
+    return (colorIndex = Math.floor(Math.random() * (3 + 1 - 0)) + 0)
+  }
 
   const colorPalette = [
     { id: 1, color: '#FFBEDA' },
