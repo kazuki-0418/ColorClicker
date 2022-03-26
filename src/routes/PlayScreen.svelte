@@ -1,12 +1,24 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte'
+
   import Background from './background.svelte'
   import ColorButton from './components/ColorButton.svelte'
   let isMatchColor: boolean = true
+  let timerSecond: number = 0
   let count: number = 10
-  const incrementCount = () => {
-    if (isMatchColor) {
-      count = count - 1
+  let intervalId
+
+  onDestroy(() => {
+    if (timerSecond) clearInterval(intervalId)
+  })
+
+  const tickSecond = () => {
+    if (timerSecond === 0) {
+      intervalId = setInterval(() => (timerSecond += 0.01), 10)
     }
+  }
+  const decrementCount = (color) => {
+    console.log(color)
   }
 
   const colorPalette = [
@@ -26,13 +38,22 @@
 
   <div
     style="display: flex;
-justify-content: center;"
+justify-content: center;
+margin-bottom: 45px;"
   >
-    <button class="start">START</button>
+    <div class="start">
+      {#if timerSecond === 0}
+        <p style="margin-top:8vmin" on:click={tickSecond}>START</p>
+      {:else if timerSecond > 0}
+        <div class="container">
+          <span class="count">{count}</span>
+          <span>{timerSecond.toFixed(3)}</span>
+        </div>{/if}
+    </div>
   </div>
   <div class="pads">
     {#each colorPalette as color}
-      <ColorButton backgroundcolor={color.color} on:click={incrementCount} />
+      <ColorButton backgroundcolor={color.color} on:click={() => decrementCount(color.color)} />
     {/each}
   </div>
 </Background>
@@ -83,17 +104,28 @@ justify-content: center;"
   .start {
     position: relative;
     margin-top: 45px;
+
     border-radius: 100%;
     background: #ffb6c1;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    text-align: center;
     border: none;
     color: #fff;
-    margin: 2.5vmin;
     height: 25vmin;
     width: 25vmin;
     font-size: 6vmin;
     font-weight: 10;
+    .container {
+      display: flex;
+      flex-direction: column;
+
+      .count {
+        font-size: 10vmin;
+        margin-bottom: 0;
+      }
+    }
+
     &:hover {
       transition-duration: 0.5s;
 
