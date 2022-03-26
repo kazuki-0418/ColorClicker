@@ -27,13 +27,19 @@
     { id: 3, color: '#FFFFDD' },
     { id: 4, color: '#CBFFD3' },
   ]
+
+  const resetGame = () => {
+    clearInterval(intervalId)
+    timerSecond = 0
+    count = 10
+  }
 </script>
 
 <Background>
   <div class="header">
     <a href="/"><button class="back" on:click>back</button></a>
 
-    <button class="reload">reload</button>
+    <button class="reload" on:click={resetGame}>reload</button>
   </div>
 
   <div
@@ -62,11 +68,11 @@ margin-bottom: 45px;"
   .header {
     display: flex;
     grid-template-columns: repeat(2, 1fr);
-    margin: 2vmin 2vmin 0 2vmin;
+    margin: 0.5vmin 0.5vmin 0 0.5vmin;
     padding: 1vmin;
-    gap: 2vmin;
     justify-content: space-between;
     .back {
+      font-size: 4vmin;
       background: rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(8px);
       width: 15vmin;
@@ -84,6 +90,7 @@ margin-bottom: 45px;"
     }
 
     .reload {
+      font-size: 4vmin;
       background: rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(8px);
       width: 15vmin;
