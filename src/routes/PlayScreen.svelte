@@ -6,6 +6,7 @@
   let isMatchColor: boolean = true
   let timerSecond: number = 0
   let count: number = 10
+  let colorIndex: number = Math.floor(Math.random() * (3 + 1 - 0)) + 0
   let intervalId
 
   onDestroy(() => {
@@ -17,9 +18,7 @@
       intervalId = setInterval(() => (timerSecond += 0.01), 10)
     }
   }
-  const decrementCount = (color) => {
-    console.log(color)
-  }
+  const decrementCount = (color) => {}
 
   const colorPalette = [
     { id: 1, color: '#FFBEDA' },
@@ -47,15 +46,18 @@
 justify-content: center;
 margin-bottom: 45px;"
   >
-    <div class="start">
-      {#if timerSecond === 0}
+    {#if timerSecond === 0}
+      <div class="start">
         <p style="margin-top:8vmin" on:click={tickSecond}>START</p>
-      {:else if timerSecond > 0}
+      </div>
+    {:else if timerSecond > 0}
+      <div class="start" style="background-color:{colorPalette[colorIndex].color}">
         <div class="container">
           <span class="count">{count}</span>
           <span>{timerSecond.toFixed(3)}</span>
-        </div>{/if}
-    </div>
+        </div>
+      </div>
+    {/if}
   </div>
   <div class="pads">
     {#each colorPalette as color}

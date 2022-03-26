@@ -2,7 +2,7 @@
   export let backgroundcolor: String
 </script>
 
-<button style="background-color:{backgroundcolor}" />
+<button style="background-color:{backgroundcolor}" on:click />
 
 <style>
   button {
