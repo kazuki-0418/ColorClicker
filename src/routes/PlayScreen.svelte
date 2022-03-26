@@ -1,5 +1,20 @@
-<script>
+<script lang="ts">
   import Background from './background.svelte'
+  import ColorButton from './components/ColorButton.svelte'
+  let isMatchColor: boolean = true
+  let count: number = 10
+  const incrementCount = () => {
+    if (isMatchColor) {
+      count = count - 1
+    }
+  }
+
+  const colorPalette = [
+    { id: 1, color: '#FFBEDA' },
+    { id: 2, color: '#BAD3FF' },
+    { id: 3, color: '#FFFFDD' },
+    { id: 4, color: '#CBFFD3' },
+  ]
 </script>
 
 <Background>
@@ -16,33 +31,9 @@ justify-content: center;"
     <button class="start">START</button>
   </div>
   <div class="pads">
-    <button
-      class="pad"
-      style="
-    background: transparent;
-    background-color:#B1F9D0;
-    backdrop-filter: hue-rotate(120deg);"
-    />
-    <button
-      class="pad"
-      style="
-    background: transparent;
-    background-color:#DCC2FF;
-    backdrop-filter: hue-rotate(120deg);"
-    />
-    <button
-      class="pad"
-      style="CBFFD3
-    background: transparent;
-    background-color:#DDFFFF;
-    backdrop-filter: hue-rotate(120deg);"
-    />
-    <button
-      class="pad"
-      style="
-    background-color:#FFDDFF;
-    backdrop-filter: hue-rotate(240deg);"
-    />
+    {#each colorPalette as color}
+      <ColorButton backgroundcolor={color.color} on:click={incrementCount} />
+    {/each}
   </div>
 </Background>
 
@@ -116,13 +107,5 @@ justify-content: center;"
     padding: 2vmin;
     gap: 2vmin;
     height: calc(100vh - 10px - 45vmin);
-
-    .pad {
-      border-radius: 10px;
-      border: 1px solid rgba(128, 128, 128, 0.25);
-      background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(8px);
-      color: #fff;
-    }
   }
 </style>
