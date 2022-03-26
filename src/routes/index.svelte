@@ -15,7 +15,7 @@
 
   <div class="buttonarea">
     {#if name}
-      <a href="/PlayScreen"><button class="playbutton"> PLAY </button></a>
+      <a href="/playscreen"><button class="playbutton"> PLAY </button></a>
     {/if}
   </div>
 </Background>
