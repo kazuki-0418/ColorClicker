@@ -3,7 +3,7 @@
 
   import Background from './background.svelte'
   import ColorButton from './components/ColorButton.svelte'
-  let isMatchColor: boolean = true
+  let isGameOver: boolean = false
   let timerSecond: number = 0
   let count: number = 10
   let colorIndex: number = Math.floor(Math.random() * (3 + 1 - 0)) + 0
@@ -21,6 +21,8 @@
   const decrementCount = (color) => {
     if (colorPalette[colorIndex].color === color) {
       count -= 1
+    } else {
+      isGameOver = true
     }
     return (colorIndex = Math.floor(Math.random() * (3 + 1 - 0)) + 0)
   }
@@ -36,6 +38,7 @@
     clearInterval(intervalId)
     timerSecond = 0
     count = 10
+    isGameOver = false
   }
 </script>
 
@@ -48,14 +51,24 @@
 
   <div
     style="display: flex;
-justify-content: center;
-margin-bottom: 45px;"
+    flex-direction:column;
+    align-items:center;
+    height: 30vmin;
+"
   >
-    {#if timerSecond === 0}
+    {#if isGameOver}
+      <p style="font-size: 10vmin;">GAMEOVER</p>
+    {:else if timerSecond === 0 && !isGameOver}
       <div class="start">
-        <p style="margin-top:8vmin" on:click={tickSecond}>START</p>
+        <p
+          style="margin-top:8vmin;
+                 color: #fff;"
+          on:click={tickSecond}
+        >
+          START
+        </p>
       </div>
-    {:else if timerSecond > 0}
+    {:else if timerSecond > 0 && !isGameOver}
       <div class="start" style="background-color:{colorPalette[colorIndex].color}">
         <div class="container">
           <span class="count">{count}</span>
@@ -75,15 +88,15 @@ margin-bottom: 45px;"
   .header {
     display: flex;
     grid-template-columns: repeat(2, 1fr);
-    margin: 0.5vmin 0.5vmin 0 0.5vmin;
+    margin: 0.5vmin 0.5vmin 0.5vmin 0.5vmin;
     padding: 1vmin;
     justify-content: space-between;
     .back {
       font-size: 4vmin;
       background: rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(8px);
-      width: 15vmin;
-      height: 7vmin;
+      width: 17vmin;
+      height: 9vmin;
       border-radius: 4px;
       box-shadow: 0.6px 1.3px 2.7px 0px rgba(0, 0, 0, 0.3);
       border: none;
@@ -100,8 +113,8 @@ margin-bottom: 45px;"
       font-size: 4vmin;
       background: rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(8px);
-      width: 15vmin;
-      height: 7vmin;
+      width: 17vmin;
+      height: 9vmin;
       border-radius: 4px;
       box-shadow: 0.6px 1.3px 2.7px 0px rgba(0, 0, 0, 0.3);
 
@@ -117,7 +130,6 @@ margin-bottom: 45px;"
   }
   .start {
     position: relative;
-    margin-top: 45px;
 
     border-radius: 100%;
     background: #ffb6c1;
@@ -125,7 +137,6 @@ margin-bottom: 45px;"
     -webkit-backdrop-filter: blur(8px);
     text-align: center;
     border: none;
-    color: #fff;
     height: 25vmin;
     width: 25vmin;
     font-size: 6vmin;
