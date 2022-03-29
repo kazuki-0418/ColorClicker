@@ -4,7 +4,7 @@
 
 <style>
   body {
-    background: url(./assets/kupono-kuwamura-LzgK6IMoSZM-unsplash.jpg);
+    background: url(./assets/gradienta-el5ZXkPvd0o-unsplash.jpg);
     background-size: cover;
     background-position: center;
     touch-action: manipulation;
@@ -18,7 +18,7 @@
     padding: 0;
     height: 100vh;
     overflow: hidden;
-    font-family: 'Chakra Petch', sans-serif;
     vertical-align: top;
+    font-family: 'Orbitron', sans-serif;
   }
 </style>
