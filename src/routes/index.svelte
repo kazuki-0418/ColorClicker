@@ -1,178 +1,317 @@
 <script lang="ts">
+  // import BannerAd from '../BannerAd.svelte'
   import { onMount } from 'svelte'
-  import { derived, writable } from 'svelte/store'
-  // import translations from './translations'
-  const defaultLocale = 'en'
+  import { t, locale } from '../i18n'
   import Background from './background.svelte'
-  let name: String = ''
-  let scoreTime: number = 0
-  let playerName: String = 'OsakaTaro'
-
-  let isCurrentEnglish: boolean = true
+  import { name, getTop1000, getRivals, getRankingTopNumber } from '../api'
 
   let ref
+  let topIndex: number
+  let twitterLinkWithName
+
+  function isTwitterLink(userName: string) {
+    const pattern = new RegExp('^@')
+    return userName.match(pattern)
+  }
+
+  function launchURL(userName: string) {
+    const twitterLink: string = 'https://twitter.com/'
+    twitterLinkWithName = twitterLink.concat(userName)
+    location.replace(twitterLinkWithName)
+  }
 
   onMount(() => {
     ref.focus()
-    isCurrentEnglish = JSON.parse(localStorage.getItem('isEnglish')) ?? true
+    ;(window['adsbygoogle'] = window['adsbygoogle'] || []).push({})
+    getScoreRivals($name)
   })
 
-  const switchLanguage = () => {
-    let beforeLanguage: boolean
-    beforeLanguage = JSON.parse(localStorage.getItem('isEnglish'))
+  function saveLocale() {
+    localStorage.setItem('locale', $locale)
+  }
 
-    if (isCurrentEnglish !== beforeLanguage || beforeLanguage === undefined) {
-      isCurrentEnglish = !isCurrentEnglish
-      localStorage.setItem('isEnglish', isCurrentEnglish.toString())
+  async function saveName() {
+    await localStorage.setItem('currentuser', $name)
+  }
+
+  async function getScore(type) {
+    if (type === 'top1000') {
+      return await getTop1000()
     }
   }
+
+  async function getScoreRivals(name: String) {
+    topIndex = await getRankingTopNumber(name)
+    return await getRivals(name)
+  }
+
+  $: if ($name) getScoreRivals($name)
 </script>
 
 <Background>
-  <div class="banner">バナー</div>
-  <!-- <div>
-    <select bind:value={$locale} on:change={saveLocale} class="glass margin_left">
-      <option value="en">English</option>
-      <option value="ja">にほんご</option>
-    </select> -->
-  <!-- </div> -->
-  <div class="header">
-    <p class="title">ColorClicker</p>
-    <div class="inputname">
-      <input class="textfield" bind:value={name} bind:this={ref} placeholder="Enter your name" />
-    </div>
-  </div>
+  <!-- <BannerAd adSlot="3083812429" height="60px" /> -->
+  <div class="banner" style="height:60px; background-color:white" />
+  <div class="flex">
+    <div class="grid">
+      <div class="wrapper">
+        <select class="glass selectBox" bind:value={$locale} on:change={saveLocale}>
+          <option value="en">English</option>
+          <option value="ja">にほんご</option>
+        </select>
 
-  <div class="buttonarea">
-    {#if name}
-      <a href="/playscreen"><button class="playbutton"> PLAY </button></a>
-    {/if}
-  </div>
+        <div class="container">
+          <div class="title">{$t('title')}</div>
+          <div class="inputname">
+            <input
+              class="glass textfield"
+              bind:value={$name}
+              bind:this={ref}
+              maxlength="12"
+              placeholder={$t('placeholder')}
+            />
+          </div>
 
-  <div class="rankingarea">
-    <p style="font-size:4vmin;line-height:1vmin;margin:3vmin auto 0 auto">Yearly Ranking</p>
-    <div style="display:flex;flex-direction:column;align-items:center; ">
-      <div style="display:flex;gap:10vmin;">
-        <div
-          class="personalscore"
-          style="display :flex;flex-direction:column;font-size: 3vmin;line-height:3.5vmin;"
-        >
-          <p style="font-size:3vmin;line-height:5px;">INDIVIDUAL RANKING</p>
+          <div class="button_area">
+            {#if $name}
+              <a href="/playscreen"
+                ><button class="playbutton" on:click={saveName}> {$t('Play')} </button></a
+              >
+            {/if}
+          </div>
+        </div>
+      </div>
 
-          <span>1 {scoreTime}s {playerName}</span>
-          <span>2 {scoreTime}s {playerName}</span>
-          <span>3 {scoreTime}s {playerName}</span>
-          <span>4 {scoreTime}s {playerName}</span>
-          <span>5 {scoreTime}s {playerName}</span>
+      <div class="glass ranking_area">
+        <div class="container_ranking">
+          <span class="ranking_title">{$t('rivals')}</span>
+          <div class="scroll_ranking">
+            <div class="column_ranking">
+              {#await getScoreRivals($name) then rivalsScores}
+                {#each rivalsScores as Score, i}
+                  <div class="row_rank">
+                    <div class="rank">{i + topIndex}</div>
+                    <div class="timer_line" class:name={$name === Score.name}>
+                      {Score.time}{$t('scoreSec')}
+                    </div>
+                    <div class="flex_name_list">
+                      {#if isTwitterLink(Score.name)}
+                        <div class="twitter_name" on:click={() => launchURL(Score.name)}>
+                          {Score.name}
+                        </div>
+                      {:else}
+                        {Score.name}
+                      {/if}
+                    </div>
+                  </div>
+                {/each}
+              {/await}
+            </div>
+          </div>
         </div>
 
-        <div
-          class="top100-area"
-          style="display :flex;flex-direction:column;font-size: 3vmin;line-height:3.5vmin;"
-        >
-          <p style="text-align: center;font-size:3vmin;line-height:2vmin;">TOP100</p>
-
-          <span>1 {scoreTime}s {playerName}</span>
-          <span>2 {scoreTime}s {playerName}</span>
-          <span>3 {scoreTime}s {playerName}</span>
-          <span>4 {scoreTime}s {playerName}</span>
-          <span>5 {scoreTime}s {playerName}</span>
+        <div class="container_ranking">
+          <span class="ranking_title">{$t('TOP1000')}</span>
+          <div class="scroll_ranking">
+            <div class="column_ranking">
+              {#await getScore('top1000')}
+                <p>loading...</p>
+              {:then top1000Scores}
+                {#each top1000Scores as Score, i}
+                  <div class="row_rank">
+                    <div class="rank">{i + 200}</div>
+                    <div class="timer_line" class:name={$name === Score.name}>
+                      {Score.time}{$t('scoreSec')}
+                    </div>
+                    <div class="flex_name_list">
+                      {#if isTwitterLink(Score.name)}
+                        <div class="twitter_name" on:click={() => launchURL(Score.name)}>
+                          {Score.name}
+                        </div>
+                      {:else}
+                        {Score.name}
+                      {/if}
+                    </div>
+                  </div>
+                {/each}
+              {/await}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div></Background
->
->
+  </div>
+</Background>
 
 <style lang="scss">
-  @import url('https://fonts.googleapis.com/css2?family=Potta+One&display=swap');
-  :global(body) {
-    font-family: 'Orbitron', sans-serif;
-  }
-  .banner {
-    background-color: azure;
-    height: 90px;
-    width: 50%;
-    text-align: center;
-    font-size: 5vmin;
-    position: relative;
-    margin: 0 auto;
-  }
-  .header {
-    margin-bottom: 3vmin;
+  .flex {
+    display: flex;
+    justify-content: center;
+    padding: 3vmin;
+    height: calc(100vh - 60px - 6vmin);
 
-    .title {
-      font-family: 'Orbitron', sans-serif;
-
-      font-size: 5vmin;
-      text-align: center;
-    }
-    .inputname {
+    .grid {
       display: flex;
-      justify-content: center;
-      align-items: center;
+      gap: 3vmin;
+      flex-direction: column;
 
-      .textfield {
-        border: none;
-        height: 5vmin;
-        font-size: 5vmin;
-        white-space: pre-wrap;
-        align-content: center;
-        position: absolute;
-        /* background: transparent; */
-        outline: none;
-        border: none;
-        resize: none;
-        overflow: hidden;
-        transform-origin: 0px 0px 0px;
-        font: 22px MPLUS1p_regular, 'Orbitron', sans-serif;
+      .wrapper {
+        height: 50%;
+
+        .selectBox {
+          padding: 0 1vmin;
+          height: 3.2vh;
+          font: 2vmin 'Orbitron';
+          cursor: pointer;
+        }
+
+        .container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 92vmin;
+          height: 100%;
+
+          .title {
+            font: 'Orbitron';
+            font-size: 6vmin;
+            height: 15vmin;
+          }
+
+          .inputname {
+            width: 100%;
+            text-align: center;
+
+            .textfield {
+              width: 50%;
+              height: 3vh;
+              backdrop-filter: blur(7px);
+              -webkit-backdrop-filter: blur(7px);
+              text-align: center;
+              font: 2vmin 'Orbitron';
+            }
+          }
+
+          .button_area {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            .playbutton {
+              border-radius: 100%;
+              background: rgba(241, 113, 113, 0.5);
+              color: #fff;
+              border: none;
+              height: 20vh;
+              width: 20vh;
+              -webkit-backdrop-filter: blur(20px);
+              backdrop-filter: blur(20px);
+              box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+              font: 4vh 'Orbitron';
+
+              &:hover {
+                cursor: pointer;
+                background: rgba(241, 113, 113, 0.4);
+              }
+            }
+          }
+        }
+      }
+
+      .ranking_area {
+        display: flex;
+        width: calc(92vmin - 2vmin);
+        height: 50%;
+        padding: 2vmin;
+        gap: 1vmin;
+
+        .container_ranking {
+          width: calc(50% - (1vmin / 2));
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          .ranking_title {
+            font-size: 3vmin;
+            margin: 0 0 2vmin 0;
+          }
+
+          .scroll_ranking::-webkit-scrollbar {
+            display: none;
+          }
+
+          .scroll_ranking {
+            width: 100%;
+            height: 90%;
+            overflow-y: auto;
+            -ms-overflow-style: none; /*IE, Edge 対応*/
+            scrollbar-width: none;
+
+            .column_ranking {
+              display: flex;
+              flex-direction: column;
+              text-align: center;
+              gap: 1.7vmin;
+              width: 100%;
+
+              .row_rank {
+                display: flex;
+                /* align-items: center; */
+                font-size: 2.8vmin;
+                line-height: 1;
+                /* height: 2.7vmin; */
+                gap: 1vmin;
+
+                .rank {
+                  text-align: end;
+                  width: 7vmin;
+                }
+
+                .timer_line {
+                  text-align: start;
+                  border-left: 0.5vmin solid #22aa5b;
+                  padding-left: 1vmin;
+                  width: 14.5vmin;
+                  white-space: nowrap;
+                }
+
+                .flex_name_list {
+                  width: 20vmin;
+                  text-align: start;
+                  word-break: break-all;
+                }
+
+                .flex_name_list::-webkit-scrollbar {
+                  display: none;
+                }
+
+                .name {
+                  border-left: 0.5vmin solid #ff00ff;
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 
-  .title {
-    font-size: 10vmin;
-    font-family: MPLUS1p_regular, Arial, sans-serif;
-  }
-  .buttonarea {
-    text-align: center;
-    height: 30vmin;
-
-    .playbutton {
-      position: relative;
-      border-radius: 100%;
-      background: rgba(241, 113, 113, 0.5);
-      color: #fff;
-      border: none;
-      margin: 2.5vmin;
-      height: 25vmin;
-      width: 25vmin;
-      font-size: 6vmin;
-      font-weight: 10;
-      border: 1px solid rgba(128, 128, 128, 0.25);
-      -webkit-backdrop-filter: blur(20px);
-      backdrop-filter: blur(20px);
-      box-shadow: rgb(0 0 0 / 30%) 0.6px 1.3px 3px 0px;
-      font-family: 'Orbitron', sans-serif;
-
-      &:hover {
-        cursor: pointer;
-        background: rgba(241, 113, 113, 0.4);
-
-        -webkit-backdrop-filter: blur(20px);
-        backdrop-filter: blur(20px);
-      }
+  .twitter_name {
+    color: blue;
+    &:hover {
+      cursor: pointer;
     }
   }
 
-  .rankingarea {
-    display: grid;
-    height: calc(100vh - 90px - 50vmin - 4vmin);
+  .glass {
+    background-color: rgba(255, 255, 255, 0.35);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: 10px;
-    border: 1px solid rgba(128, 128, 128, 0.25);
-    margin: 0 5vmin 0 5vmin;
+    border: none;
+    outline: none;
   }
 </style>

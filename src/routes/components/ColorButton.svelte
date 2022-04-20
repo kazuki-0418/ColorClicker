@@ -3,7 +3,7 @@
   export let isDisable: boolean = false
 </script>
 
-<button disabled={isDisable} style="background-color:{backgroundcolor}" on:click />
+<button disabled={isDisable} style="background-color:{backgroundcolor};" on:click />
 
 <style lang="scss">
   button {
@@ -12,7 +12,7 @@
     -webkit-backdrop-filter: blur(15px);
     border-radius: 10px;
     border: 1px solid rgba(128, 128, 128, 0.25);
-    color: white;
+    height: 100%;
     &:hover {
       cursor: pointer;
       opacity: 0.9;
