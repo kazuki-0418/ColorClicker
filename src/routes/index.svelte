@@ -8,7 +8,26 @@
   let ref
   let topIndex: number
   let twitterLinkWithName
-
+  function getLen(str) {
+    let result = 0
+    for (let i = 0; i < str.length; i++) {
+      let chr = str.charCodeAt(i)
+      if (
+        (chr >= 0x00 && chr < 0x81) ||
+        chr === 0xf8f0 ||
+        (chr >= 0xff61 && chr < 0xffa0) ||
+        (chr >= 0xf8f1 && chr < 0xf8f4)
+      ) {
+        //半角文字の場合は1を加算
+        result += 1
+      } else {
+        //それ以外の文字の場合は2を加算
+        result += 2
+      }
+    }
+    //結果を返す
+    return result
+  }
   function isTwitterLink(userName: string) {
     const pattern = new RegExp('^@')
     return userName.match(pattern)
@@ -17,7 +36,7 @@
   function launchURL(userName: string) {
     const twitterLink: string = 'https://twitter.com/'
     twitterLinkWithName = twitterLink.concat(userName)
-    location.replace(twitterLinkWithName)
+    window.open(twitterLinkWithName)
   }
 
   onMount(() => {
@@ -45,7 +64,10 @@
     return await getRivals(name)
   }
 
-  $: if ($name) getScoreRivals($name)
+  $: if ($name) {
+    getScoreRivals($name)
+    getLen($name)
+  }
 </script>
 
 <Background>
@@ -66,21 +88,25 @@
               class="glass textfield"
               bind:value={$name}
               bind:this={ref}
-              maxlength="12"
+              on:change={getLen}
               placeholder={$t('placeholder')}
             />
           </div>
 
           <div class="button_area">
-            {#if $name}
-              <a href="/playscreen"
-                ><button class="playbutton" on:click={saveName}> {$t('Play')} </button></a
+            <a href="/playscreen"
+              ><button
+                class="playbutton"
+                on:click={saveName}
+                disabled
+                class:isHidePlayButton={!$name}
               >
-            {/if}
+                {$t('Play')}
+              </button></a
+            >
           </div>
         </div>
       </div>
-
       <div class="glass ranking_area">
         <div class="container_ranking">
           <span class="ranking_title">{$t('rivals')}</span>
@@ -139,8 +165,8 @@
         </div>
       </div>
     </div>
-  </div>
-</Background>
+  </div></Background
+>
 
 <style lang="scss">
   .flex {
@@ -150,12 +176,12 @@
     height: calc(100vh - 60px - 6vmin);
 
     .grid {
-      display: flex;
+      /* display: flex;
       gap: 3vmin;
-      flex-direction: column;
+      flex-direction: column; */
 
       .wrapper {
-        height: 50%;
+        height: calc(50% - 3vmin);
 
         .selectBox {
           padding: 0 1vmin;
@@ -163,19 +189,15 @@
           font: 2vmin 'Orbitron';
           cursor: pointer;
         }
-
         .container {
+          height: calc(100% - 3.2vh);
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
-          width: 92vmin;
-          height: 100%;
+          justify-content: space-around;
 
           .title {
-            font: 'Orbitron';
-            font-size: 6vmin;
-            height: 15vmin;
+            font-size: 4vmin;
           }
 
           .inputname {
@@ -184,7 +206,7 @@
 
             .textfield {
               width: 50%;
-              height: 3vh;
+              height: 3.2vh;
               backdrop-filter: blur(7px);
               -webkit-backdrop-filter: blur(7px);
               text-align: center;
@@ -193,7 +215,6 @@
           }
 
           .button_area {
-            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -214,6 +235,12 @@
               &:hover {
                 cursor: pointer;
                 background: rgba(241, 113, 113, 0.4);
+              }
+            }
+            .isHidePlayButton {
+              visibility: hidden;
+              :disabled {
+                display: none;
               }
             }
           }
