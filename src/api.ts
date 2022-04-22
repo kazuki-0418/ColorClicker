@@ -61,7 +61,6 @@ export const getRivals = async (name: String) => {
   playerScore = await getPlayerScore(name)
   overRivalsScore = await getOverScoreList(name)
   underRivalsScore = await getUnderScoreList(name)
-  console.table(underRivalsScore)
   if (playerScore == null || rankingAllList == null) {
     return []
   }
@@ -83,7 +82,6 @@ const getUnderScoreList = async (name) => {
   if (playerScore == null) {
     return []
   }
-  rankingAllList = await fetchAllScores()
   underRivalsScore = rankingAllList.filter(function (rankingList) {
     return playerScore[0].time < rankingList.time
   })

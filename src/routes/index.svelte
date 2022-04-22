@@ -8,26 +8,6 @@
   let ref
   let topIndex: number
   let twitterLinkWithName
-  function getLen(str) {
-    let result = 0
-    for (let i = 0; i < str.length; i++) {
-      let chr = str.charCodeAt(i)
-      if (
-        (chr >= 0x00 && chr < 0x81) ||
-        chr === 0xf8f0 ||
-        (chr >= 0xff61 && chr < 0xffa0) ||
-        (chr >= 0xf8f1 && chr < 0xf8f4)
-      ) {
-        //半角文字の場合は1を加算
-        result += 1
-      } else {
-        //それ以外の文字の場合は2を加算
-        result += 2
-      }
-    }
-    //結果を返す
-    return result
-  }
   function isTwitterLink(userName: string) {
     const pattern = new RegExp('^@')
     return userName.match(pattern)
@@ -51,6 +31,7 @@
 
   async function saveName() {
     await localStorage.setItem('currentuser', $name)
+    location.href = '/playscreen'
   }
 
   async function getScore(type) {
@@ -66,7 +47,6 @@
 
   $: if ($name) {
     getScoreRivals($name)
-    getLen($name)
   }
 </script>
 
@@ -86,24 +66,18 @@
           <div class="inputname">
             <input
               class="glass textfield"
+              type="text"
               bind:value={$name}
               bind:this={ref}
-              on:change={getLen}
+              maxlength="16"
               placeholder={$t('placeholder')}
             />
           </div>
 
           <div class="button_area">
-            <a href="/playscreen"
-              ><button
-                class="playbutton"
-                on:click={saveName}
-                disabled
-                class:isHidePlayButton={!$name}
-              >
-                {$t('Play')}
-              </button></a
-            >
+            <button class="playbutton" on:click={saveName} class:isHidePlayButton={!$name}>
+              {$t('Play')}
+            </button>
           </div>
         </div>
       </div>
@@ -177,7 +151,7 @@
 
     .grid {
       /* display: flex;
-      gap: 3vmin;
+      gap: 1.5vmin;
       flex-direction: column; */
 
       .wrapper {
@@ -194,7 +168,7 @@
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: space-around;
+          justify-content: space-evenly;
 
           .title {
             font-size: 4vmin;
@@ -211,6 +185,12 @@
               -webkit-backdrop-filter: blur(7px);
               text-align: center;
               font: 2vmin 'Orbitron';
+            }
+            .hide_alert {
+              visibility: hidden;
+            }
+            .alert_length {
+              color: red;
             }
           }
 

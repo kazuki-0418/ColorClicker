@@ -145,15 +145,11 @@
   <div class="flex">
     <div class="grid">
       <div class="header">
-        <a href="/"
-          ><button class="box"
-            ><span class="material-icons-outlined box-icon">arrow_back_ios</span></button
-          ></a
+        <span class="material-icons-outlined box-icon" on:click={() => (location.href = '/')}
+          >arrow_back_ios</span
         >
 
-        <button class="box" on:click={resetGame}
-          ><span class="material-icons-outlined box-icon">refresh</span></button
-        >
+        <span class="material-icons-outlined box-icon" on:click={resetGame}>refresh</span>
       </div>
 
       <div class="flexbox">
@@ -218,26 +214,16 @@
     .header {
       display: flex;
       grid-template-columns: repeat(2, 1fr);
-      justify-content: end;
+      justify-content: start;
       gap: 2vmin;
 
-      .box {
-        background: rgba(255, 255, 255, 0.6);
-        width: 9vmin;
-        height: 9vmin;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        border: 1px solid rgba(128, 128, 128, 0.25);
-        border-radius: 10px;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-
-        .box-icon {
-          font-size: 5vmin;
-        }
-        &:hover {
-          transition-duration: 0.2s;
-          cursor: pointer;
-        }
+      .box-icon {
+        font-size: 5vmin;
+        color: #555;
+      }
+      &:hover {
+        transition-duration: 0.2s;
+        cursor: pointer;
       }
     }
 
@@ -322,5 +308,6 @@
     border-radius: 10px;
     border: 1px solid rgba(128, 128, 128, 0.25);
     outline: none;
+    opacity: 0.3;
   }
 </style>
