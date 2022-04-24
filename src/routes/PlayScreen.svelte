@@ -2,7 +2,7 @@
   // import BannerAd from '../BannerAd.svelte'
 
   import { onMount, onDestroy } from 'svelte'
-  import Background from './background.svelte'
+  import Background from './_background.svelte'
   import ColorButton from './components/ColorButton.svelte'
   import {
     collection,
@@ -155,13 +155,11 @@
       <div class="flexbox">
         {#if isGameOver}
           <div class="gameover">
-            <span>{$t('game')}</span>
-            <span>{$t('over')}</span>
+            <span>{$t('game_over')}</span>
           </div>
         {:else if isGameclear}
           <div class="gameclear">
-            <span>{$t('game')}</span>
-            <span>{$t('clear')}</span>
+            <span>{$t('game_clear')}</span>
             <span class="timersec">{timerSecond.toFixed(3)}</span>
           </div>
         {:else if timerSecond === 0 && !isGameOver}

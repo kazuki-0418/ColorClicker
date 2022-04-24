@@ -4,26 +4,36 @@ import { getApp, getApps, initializeApp } from 'firebase/app'
 import { collection, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore'
 import { writable } from 'svelte/store'
 
-export const name = writable(browser ? window.localStorage.name ?? '' : '')
+const BLANK = ''
+const RIVALS_LENGTH = 10
+const ALL_SCORE_LENGTH = 1000
+
+export const name = writable(getStorageName())
 browser && name.subscribe((val) => (window.localStorage.name = val))
 
 let year = new Date().getFullYear()
 let rankingAllList = []
 let overRivalsScore = []
 let underRivalsScore = []
-
 let playerScore = []
+
+function getStorageName(): string {
+  if (!browser) return
+
+  return window.localStorage.name ?? BLANK
+}
 
 initializeApp(firebaseConfig)
 const firebaseApp = browser && getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 const db = browser && getFirestore(firebaseApp)
 const colRef = browser && collection(db, 'time-scores')
-export const fetchAllScores = async () => {
-  let topAllScores = []
 
+export async function fetchAllScores() {
+  let topAllScores = []
   let topAllQuery =
     browser && query(colRef, orderBy('time'), where('year', '==', year), limit(1000))
   let querySnapshot = await getDocs(topAllQuery)
+
   querySnapshot.forEach((doc) => {
     topAllScores.push({
       // id: doc.id,
@@ -32,92 +42,99 @@ export const fetchAllScores = async () => {
       time: doc.data().time,
     })
   })
+
   return topAllScores
 }
 
-const filterRank = async (inputName: string) => {
+async function filterRank(inputName: string) {
   rankingAllList = await fetchAllScores()
+
   return rankingAllList.filter(function (rankingList) {
     return rankingList.year == year && rankingList.name == inputName
   })
 }
 
-// 自分のスコアを取得する
-const getPlayerScore = async (name) => {
+async function getPlayerScore(name: string) {
   playerScore = await filterRank(name)
+
   return playerScore.length == 0 ? null : playerScore
 }
 
-const getRankinListWithUpToNumber = () => {
-  if (rankingAllList == null) {
-    return []
-  }
-  return rankingAllList.length > 10 ? rankingAllList.slice(0, 10) : rankingAllList
+async function getRankinListWithUpToNumber() {
+  if (rankingAllList == null) return []
+
+  return rankingAllList.length > RIVALS_LENGTH
+    ? rankingAllList.slice(0, RIVALS_LENGTH)
+    : rankingAllList
 }
 
-// 取ってきた1000個を使って自分より
-// 早いスコアを9件、最後に自分のスコアを1件追加して表示する　or 自分が10位以内であれば10件表示させる
-export const getRivals = async (name: String) => {
+// 早いスコアを4件、自分のスコアを1件、遅いスコア5件追加して表示する　or 自分が10位以内であれば10件表示させる
+export async function getRivals(name: string) {
   playerScore = await getPlayerScore(name)
   overRivalsScore = await getOverScoreList(name)
   underRivalsScore = await getUnderScoreList(name)
-  if (playerScore == null || rankingAllList == null) {
-    return []
-  }
+
+  if (playerScore == null || rankingAllList == null) return []
+
+  //TODO マジックナンバについて岩崎さんに9、5を再確認
   if (overRivalsScore.length < 9) {
     return getRankinListWithUpToNumber()
   } else if (underRivalsScore.length < 5) {
     let listOfOverScore = overRivalsScore.slice(overRivalsScore.length - 5, overRivalsScore.length)
     let listOfUnderScore = underRivalsScore.slice(0, underRivalsScore.length)
+
     return listOfOverScore.concat(playerScore).concat(listOfUnderScore)
   } else {
     let listOfOverScore = overRivalsScore.slice(overRivalsScore.length - 5, overRivalsScore.length)
     let listOfUnderScore = underRivalsScore.slice(0, 4)
+
     return listOfOverScore.concat(playerScore).concat(listOfUnderScore)
   }
 }
 
-const getUnderScoreList = async (name) => {
+async function getUnderScoreList(name: string) {
   playerScore = await getPlayerScore(name)
-  if (playerScore == null) {
-    return []
-  }
+
+  if (playerScore == null) return []
+
   underRivalsScore = rankingAllList.filter(function (rankingList) {
     return playerScore[0].time < rankingList.time
   })
+
   return underRivalsScore
 }
 
-const getOverScoreList = async (name) => {
+async function getOverScoreList(name: string) {
   playerScore = await getPlayerScore(name)
-  if (playerScore == null) {
-    return []
-  }
+
+  if (playerScore == null) return []
+
   overRivalsScore = rankingAllList.filter(function (rankingList) {
     return playerScore[0].time > rankingList.time
   })
+
   return overRivalsScore
 }
 
-// 自分の９個上の順位を表示する
-export const getRankingTopNumber = async (name) => {
+// 自分の９個上の順位番号を表示する
+// マジックナンバーに番号
+export async function getRankingTopNumber(name: string) {
   playerScore = await getPlayerScore(name)
   overRivalsScore = await getOverScoreList(name)
   underRivalsScore = await getUnderScoreList(name)
-  if (playerScore == null || rankingAllList == null) {
-    return 1
-  }
-  // if (underRivalsScore.length < 4) {
-  //   return overRivalsScore.length - 3
-  // }
+
+  if (playerScore == null || rankingAllList == null) return 1
+
   return overRivalsScore.length < 9 ? 1 : overRivalsScore.length - 4
 }
 
 // 取ってきた1000個のスコアの内、上位100個を生成する
-export const getTop1000 = async () => {
+export async function getTop1000() {
   rankingAllList = await fetchAllScores()
-  if (rankingAllList.length > 1000) {
-    rankingAllList.slice(0, 999)
+
+  if (rankingAllList.length > ALL_SCORE_LENGTH) {
+    rankingAllList.slice(0, ALL_SCORE_LENGTH - 1)
   }
+
   return rankingAllList
 }

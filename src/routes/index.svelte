@@ -2,21 +2,22 @@
   // import BannerAd from '../BannerAd.svelte'
   import { onMount } from 'svelte'
   import { t, locale } from '../i18n'
-  import Background from './background.svelte'
-  import { name, getTop1000, getRivals, getRankingTopNumber } from '../api'
+  import Background from './_background.svelte'
+  import { name, getTop1000, getRivals, getRankingTopNumber } from '../firestore_api'
 
-  let ref
+  let ref: HTMLInputElement
   let topIndex: number
-  let twitterLinkWithName
+
   function isTwitterLink(userName: string) {
     const pattern = new RegExp('^@')
+
     return userName.match(pattern)
   }
 
   function launchURL(userName: string) {
     const twitterLink: string = 'https://twitter.com/'
-    twitterLinkWithName = twitterLink.concat(userName)
-    window.open(twitterLinkWithName)
+
+    window.open(twitterLink.concat(userName))
   }
 
   onMount(() => {
@@ -34,14 +35,13 @@
     location.href = '/playscreen'
   }
 
-  async function getScore(type) {
-    if (type === 'top1000') {
-      return await getTop1000()
-    }
+  async function getScore() {
+    return await getTop1000()
   }
 
-  async function getScoreRivals(name: String) {
+  async function getScoreRivals(name: string) {
     topIndex = await getRankingTopNumber(name)
+
     return await getRivals(name)
   }
 
@@ -76,7 +76,7 @@
 
           <div class="button_area">
             <button class="playbutton" on:click={saveName} class:isHidePlayButton={!$name}>
-              {$t('Play')}
+              {$t('play')}
             </button>
           </div>
         </div>
@@ -91,7 +91,8 @@
                   <div class="row_rank">
                     <div class="rank">{i + topIndex}</div>
                     <div class="timer_line" class:name={$name === Score.name}>
-                      {Score.time}{$t('scoreSec')}
+                      {Score.time}
+                      <!-- {$t('scoreSec')} -->
                     </div>
                     <div class="flex_name_list">
                       {#if isTwitterLink(Score.name)}
@@ -110,17 +111,17 @@
         </div>
 
         <div class="container_ranking">
-          <span class="ranking_title">{$t('TOP1000')}</span>
+          <span class="ranking_title">{$t('TOP_1000')}</span>
           <div class="scroll_ranking">
             <div class="column_ranking">
-              {#await getScore('top1000')}
+              {#await getScore()}
                 <p>loading...</p>
               {:then top1000Scores}
                 {#each top1000Scores as Score, i}
                   <div class="row_rank">
-                    <div class="rank">{i + 200}</div>
+                    <div class="rank">{i + 1}</div>
                     <div class="timer_line" class:name={$name === Score.name}>
-                      {Score.time}{$t('scoreSec')}
+                      {Score.time}<!-- {$t('sec')} -->
                     </div>
                     <div class="flex_name_list">
                       {#if isTwitterLink(Score.name)}
@@ -280,7 +281,8 @@
                   text-align: start;
                   border-left: 0.5vmin solid #22aa5b;
                   padding-left: 1vmin;
-                  width: 14.5vmin;
+                  /* width: 14.5vmin; */
+                  width: 12.5vmin;
                   white-space: nowrap;
                 }
 

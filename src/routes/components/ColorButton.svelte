@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let backgroundcolor: String
+  export let backgroundcolor: string
   export let isDisable: boolean = false
 </script>
 
